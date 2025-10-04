@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// - Loads first page on open
 /// - Loads next page as user scrolls
 /// - Shows a spinner at bottom while fetching more
-class PaginatedDropdownList extends StatefulWidget {
+class PaginationDropdownList extends StatefulWidget {
   // Title text displayed above the dropdown
   final String textTitle;
   // Hint text displayed when no item is selected
@@ -33,11 +33,11 @@ class PaginatedDropdownList extends StatefulWidget {
 
   //colors
   final Color primary = Color(0xFFFF746B); //
-  Color grey = Color(0xffDDDDDD);
-  Color greyLight = Color(0xff979797); //
+  final Color grey = Color(0xffDDDDDD);
+  final Color greyLight = Color(0xff979797); //
 
   //selected item colot
-  Color selectedColor;
+  final Color selectedColor;
 
   /// Page size for pagination (default: 10)
   final int pageSize;
@@ -51,8 +51,8 @@ class PaginatedDropdownList extends StatefulWidget {
   /// no Item message
   final String? notItemMessage;
 
-  PaginatedDropdownList({
-    Key? key,
+  PaginationDropdownList({
+    super.key,
     required this.textTitle,
     required this.hintText,
     required this.onChanged,
@@ -68,13 +68,13 @@ class PaginatedDropdownList extends StatefulWidget {
     this.errorStateWidget,
     this.pageSize = 10,
     this.selectedColor = const Color(0xFFFF746B),
-  }) : super(key: key);
+  });
 
   @override
-  State<PaginatedDropdownList> createState() => _PaginatedDropdownListState();
+  State<PaginationDropdownList> createState() => _PaginationDropdownListState();
 }
 
-class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
+class _PaginationDropdownListState extends State<PaginationDropdownList> {
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
 
@@ -202,8 +202,6 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
   }
 
   void _showOverlay() {
-    // this method define the position of the dropdown list and show the list view as overlay
-
     final overlay = Overlay.of(context);
     final renderBox = context.findRenderObject() as RenderBox?;
     final size = renderBox?.size ?? Size(400, 50);
@@ -224,7 +222,7 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
                     link: _layerLink,
                     showWhenUnlinked: false,
                     offset: Offset(0, 45),
-                    child: _buildDropdownContent(),
+                    child: _buildDropdownContentWithDirection(),
                   ),
                 ),
               ],
@@ -234,10 +232,20 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
       },
     );
 
-    overlay?.insert(_overlayEntry!);
+    overlay.insert(_overlayEntry!);
     setState(() {
       _isOpen = true;
     });
+  }
+
+  Widget _buildDropdownContentWithDirection() {
+    // Get the text direction from the original context
+    final textDirection = Directionality.of(context);
+
+    return Directionality(
+      textDirection: textDirection,
+      child: _buildDropdownContent(),
+    );
   }
 
   Widget _buildDropdownContent() {
@@ -267,54 +275,11 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
     }
 
     if (_hasError && _items.isEmpty) {
-      return widget.errorStateWidget ??
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, color: Colors.red, size: 24),
-                SizedBox(height: 8),
-                Text(
-                  widget.errorMessage!,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: () {
-                    _fetchInitialData();
-                    _overlayEntry?.markNeedsBuild();
-                  },
-                  child: Text(
-                    'Retry',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-          );
+      return _buildErrorState();
     }
 
     if (_items.isEmpty) {
-      return widget.emptyStateWidget ??
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                widget.notItemMessage!,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: widget.greyLight,
-                ),
-              ),
-            ),
-          );
+      return _buildEmptyState();
     }
 
     return NotificationListener<ScrollNotification>(
@@ -342,6 +307,8 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
 
   Widget _buildListItem(String item) {
     final isSelected = item == _selectedItem;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
     return Material(
       color: isSelected ? widget.grey.withOpacity(0.1) : Colors.transparent,
       child: ListTile(
@@ -352,7 +319,9 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
             color: isSelected ? widget.selectedColor : Colors.black,
           ),
+          textAlign: isRTL ? TextAlign.right : TextAlign.left,
         ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         onTap: () {
           setState(() {
             _selectedItem = item;
@@ -378,6 +347,8 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
   }
 
   Widget _buildNoMoreItems() {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
     return Padding(
       padding: EdgeInsets.all(16),
       child: Center(
@@ -389,9 +360,66 @@ class _PaginatedDropdownListState extends State<PaginatedDropdownList> {
             color: widget.greyLight,
             fontStyle: FontStyle.italic,
           ),
+          textAlign: isRTL ? TextAlign.right : TextAlign.left,
         ),
       ),
     );
+  }
+
+  Widget _buildErrorState() {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return widget.errorStateWidget ??
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 24),
+              SizedBox(height: 8),
+              Text(
+                widget.errorMessage!,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+                textAlign: isRTL ? TextAlign.right : TextAlign.left,
+              ),
+              SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () {
+                  _fetchInitialData();
+                  _overlayEntry?.markNeedsBuild();
+                },
+                child: Text(
+                  'Retry',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );
+  }
+
+  Widget _buildEmptyState() {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return widget.emptyStateWidget ??
+        Center(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              widget.notItemMessage!,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: widget.greyLight,
+              ),
+              textAlign: isRTL ? TextAlign.right : TextAlign.left,
+            ),
+          ),
+        );
   }
 
   void _removeOverlay() {
