@@ -4,11 +4,39 @@ import 'package:pagination_dropdown_liste/pagination_dropdown_liste.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
+}
+
+class User {
+  final int id;
+  final String name;
+
+  User({required this.id, required this.name});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(id: json['id'], name: json['name']);
+  }
+}
+
+class ApiService {
+  ApiService();
+
+  Future<List<User>> getUsers(int page, int pageSize) async {
+    await Future.delayed(Duration(seconds: 2)); // Simulate network delay
+    return List.generate(pageSize, (index) {
+      int userId = (page - 1) * pageSize + index + 1;
+      return User(id: userId, name: 'User $userId');
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final User currentUser = User(
+    id: 1,
+    name: 'John Doe',
+  ); // Example pre-selected user
 
   // This widget is the root of your application.
   @override
@@ -29,58 +57,13 @@ class MyApp extends StatelessWidget {
           child: ScaleTransition(
             scale: AlwaysStoppedAnimation(1.0), // You can animate this
             child: PaginationDropdownList(
-              textTitle: 'التصنيف',
-              hintText: 'العنصر المطلوب',
-              onChanged: (String? selectedValue) {
-                // Fixed callback type
-                if (selectedValue != null) {
-                  print('Selected: $selectedValue');
-                }
-              },
-              itemParser: (item) => item,
-              //initialItem: 'المن',
-              pageSize: 10,
-              noMoreItemsMessage: 'لا يوجد المزيد من العناصر',
-              notItemMessage: 'لا يوجد عناصر',
-              fetchItems: (pageIndex, pageSize) async {
-                try {
-                  final response = await http.get(
-                    Uri.parse(
-                      'https://www.sindibad-back.com:82/api/Categories?pageNumber=$pageIndex&pageSize=$pageSize',
-                    ),
-                    headers: {'accept': 'text/plain'},
-                  );
-
-                  if (response.statusCode == 200) {
-                    final Map<String, dynamic> responseData = json.decode(
-                      response.body,
-                    );
-
-                    if (responseData['success'] == true) {
-                      final Map<String, dynamic> data = responseData['data'];
-                      final List<dynamic> items = data['items'];
-
-                      // Store the full objects
-                      final List<Map<String, dynamic>> categoryObjects = items
-                          .cast<Map<String, dynamic>>();
-
-                      // Add to our master list
-                      // _allCategories.addAll(categoryObjects);
-
-                      // Return just the names for the dropdown
-                      return categoryObjects.map<String>((item) {
-                        return item['name']?.toString() ?? 'Unknown Category';
-                      }).toList();
-                    } else {
-                      throw Exception('API Error: ${responseData['message']}');
-                    }
-                  } else {
-                    throw Exception('HTTP Error: ${response.statusCode}');
-                  }
-                } catch (e) {
-                  throw Exception('Network error: $e');
-                }
-              },
+              textTitle: 'User',
+              hintText: 'Select user',
+              initialItem: currentUser.name, // Pre-select a User object
+              onChanged: (user) => print('Selected: $user'),
+              itemParser: (user) => user.name,
+              fetchItems: (page, pageSize) async =>
+                  await ApiService().getUsers(page, pageSize),
             ),
           ),
         ),

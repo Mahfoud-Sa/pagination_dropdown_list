@@ -151,10 +151,10 @@ packages:
     dependency: "direct dev"
     description:
       name: pagination_dropdown_liste
-      sha256: a698528e7a4e0fd07acbdfa753e7be558ce99a8764a85d2f82a72a152f64fb46
+      sha256: f2f08fe7b6532b2b40682e6de4b540a5f07ccd24f580f88377ee3e6e7bcf2034
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   path:
     dependency: transitive
     description:

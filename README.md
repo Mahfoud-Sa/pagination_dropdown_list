@@ -10,7 +10,6 @@ See the example directory for complete usage examples.
 
 ## Features
 
-- Paginated data loading
-- Search filtering
+- Pagination data loading
 - Infinite scrolling
 - Customizable UI

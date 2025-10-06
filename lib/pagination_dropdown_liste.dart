@@ -12,6 +12,8 @@ class PaginationDropdownList extends StatefulWidget {
 
   /// Whether the dropdown list is enabled
   final bool enabled;
+
+  /// Initial selected item
   final String? initialItem;
 
   /// Whether the field is required (shows asterisk if true)
