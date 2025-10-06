@@ -83,10 +83,8 @@ It’s fully compatible with **Material 3** and **Directionality (RTL/LTR)**.
 
 ## 📸 Preview
 
-![Example preview](https://raw.githubusercontent.com/yourusername/pagination_dropdown_liste/main/assets/demo.gif)
 
----
-
+![Example preview](image-1.png)
 ## 🧾 Notes
 
 - Works perfectly with REST APIs, Firebase, or any async data source.  
