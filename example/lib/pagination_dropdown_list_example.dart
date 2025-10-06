@@ -31,7 +31,12 @@ class MyApp extends StatelessWidget {
             child: PaginationDropdownList(
               textTitle: 'التصنيف',
               hintText: 'العنصر المطلوب',
-              onChanged: (String) {},
+              onChanged: (String? selectedValue) {
+                // Fixed callback type
+                if (selectedValue != null) {
+                  print('Selected: $selectedValue');
+                }
+              },
               itemParser: (item) => item,
               //initialItem: 'المن',
               pageSize: 10,
