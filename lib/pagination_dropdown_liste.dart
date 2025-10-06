@@ -43,12 +43,15 @@ class PaginationDropdownList extends StatefulWidget {
   final int pageSize;
 
   /// no more items message
+  /// default: "No more items"
   final String? noMoreItemsMessage;
 
   /// error message
+  /// default: "error occurred while fetching data"
   final String? errorMessage;
 
   /// no Item message
+  /// default: "No items available"
   final String? notItemMessage;
 
   PaginationDropdownList({
