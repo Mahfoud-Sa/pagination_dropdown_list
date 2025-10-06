@@ -1,278 +1,543 @@
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-// class PaginationDropdownList<T> extends StatefulWidget {
-//   final String textTitle;
-//   final String hintText;
-//   final String Function(T) itemParser;
-//   final ValueChanged<T?> onChanged;
-//   final Future<List<T>> Function(int page, int pageSize) fetchItems;
-//   final Color? selectedColor;
-//   final int pageSize;
-//   final String? noMoreItemsMessage;
-//   final String? errorMessage;
-//   final String? notItemMessage;
+/// Dropdown list with pagination support.
+/// - Loads first page on open
+/// - Loads next page as user scrolls
+/// - Shows a spinner at bottom while fetching more
+class PaginationDropdownList extends StatefulWidget {
+  /// Title text displayed above the dropdown
+  final String textTitle;
 
-//   const PaginationDropdownList({
-//     Key? key,
-//     required this.textTitle,
-//     required this.hintText,
-//     required this.onChanged,
-//     required this.itemParser,
-//     required this.fetchItems,
-//     this.selectedColor,
-//     this.pageSize = 10,
-//     this.noMoreItemsMessage,
-//     this.errorMessage,
-//     this.notItemMessage,
-//   }) : super(key: key);
+  /// Hint text displayed when no item is selected
+  final String hintText;
 
-//   @override
-//   State<PaginationDropdownList<T>> createState() =>
-//       _PaginationDropdownListState<T>();
-// }
+  /// Whether the dropdown list is enabled
+  final bool enabled;
 
-// class _PaginationDropdownListState<T> extends State<PaginationDropdownList<T>> {
-//   final LayerLink _layerLink = LayerLink();
-//   final ScrollController _scrollController = ScrollController();
+  /// Initial selected item
+  final String? initialItem;
 
-//   List<T> _items = [];
-//   bool _isDropdownOpen = false;
-//   bool _isLoading = false;
-//   bool _hasMore = true;
-//   bool _hasError = false;
-//   int _currentPage = 0; // Start from 0, increment before first fetch
-//   OverlayEntry? _overlayEntry;
-//   T? _selectedItem;
+  /// Whether the field is required (shows asterisk if true)
+  final bool? isRequired;
+  final Function(String?) onChanged;
 
-//   @override
-//   void initState() {
-//     super.initState();
+  /// Function that fetches a page of items.
+  /// The [page] starts from 1.
+  final Future<List<dynamic>> Function(int page, int pageSize)? fetchItems;
 
-//     _scrollController.addListener(() {
-//       if (_scrollController.position.pixels >=
-//               _scrollController.position.maxScrollExtent - 50 &&
-//           !_isLoading &&
-//           _hasMore &&
-//           !_hasError) {
-//         _fetchItems();
-//       }
-//     });
-//   }
+  /// Converts raw API item to a displayable string.
+  /// Converts raw API item to displayable string
+  ///
+  /// Example:
+  /// ```dart
+  /// itemParser: (item) => item.name
+  /// ```
+  final String Function(dynamic item) itemParser;
 
-//   @override
-//   void dispose() {
-//     _scrollController.dispose();
-//     _overlayEntry?.remove();
-//     super.dispose();
-//   }
+  /// Optional widget to display when no items are available
+  final Widget? emptyStateWidget;
 
-//   Future<void> _fetchItems() async {
-//     if (_isLoading) return;
+  /// Optional widget to display when there's an error
+  final Widget? errorStateWidget;
 
-//     setState(() {
-//       _isLoading = true;
-//       _hasError = false;
-//     });
+  //colors
+  final Color primary = Color(0xFFFF746B); //
+  final Color grey = Color(0xffDDDDDD);
+  final Color greyLight = Color(0xff979797); //
 
-//     try {
-//       final nextPage = _currentPage + 1;
-//       final newItems = await widget.fetchItems(nextPage, widget.pageSize);
+  //selected item colot
+  final Color selectedColor;
 
-//       setState(() {
-//         if (newItems.isEmpty) {
-//           _hasMore = false;
-//         } else {
-//           _currentPage = nextPage;
-//           _items.addAll(newItems);
-//         }
-//         _isLoading = false;
-//       });
-//     } catch (e) {
-//       debugPrint('Error fetching items: $e');
-//       setState(() {
-//         _hasError = true;
-//         _isLoading = false;
-//       });
-//     }
-//   }
+  /// Page size for pagination (default: 10)
+  final int pageSize;
 
-//   void _resetAndFetch() {
-//     setState(() {
-//       _items.clear();
-//       _currentPage = 0;
-//       _hasMore = true;
-//       _hasError = false;
-//     });
-//     _fetchItems();
-//   }
+  /// no more items message
+  /// default: "No more items"
+  final String? noMoreItemsMessage;
 
-//   void _toggleDropdown() {
-//     if (_isDropdownOpen) {
-//       _closeDropdown();
-//     } else {
-//       _openDropdown();
-//     }
-//   }
+  /// error message
+  /// default: "error occurred while fetching data"
+  final String? errorMessage;
 
-//   void _openDropdown() {
-//     // Reset and load fresh data when opening dropdown
-//     _resetAndFetch();
+  /// no Item message
+  /// default: "No items available"
+  final String? noItemMessage;
 
-//     final overlay = Overlay.of(context);
-//     final renderBox = context.findRenderObject() as RenderBox?;
-//     if (renderBox == null) return;
+  PaginationDropdownList({
+    super.key,
+    required this.textTitle,
+    required this.hintText,
+    required this.onChanged,
+    required this.itemParser,
+    this.noMoreItemsMessage = "No more items",
+    this.errorMessage = "error occurred while fetching data",
+    this.noItemMessage = "No items available",
+    this.enabled = true,
+    this.initialItem,
+    this.isRequired,
+    this.fetchItems,
+    this.emptyStateWidget,
+    this.errorStateWidget,
+    this.pageSize = 10,
+    this.selectedColor = const Color(0xFFFF746B),
+  });
 
-//     final size = renderBox.size;
+  @override
+  State<PaginationDropdownList> createState() => _PaginationDropdownListState();
+}
 
-//     _overlayEntry = OverlayEntry(
-//       builder: (context) => Positioned(
-//         width: size.width,
-//         child: CompositedTransformFollower(
-//           link: _layerLink,
-//           showWhenUnlinked: false,
-//           offset: Offset(0, size.height + 4),
-//           child: Material(
-//             elevation: 4,
-//             borderRadius: BorderRadius.circular(8),
-//             color: widget.selectedColor ?? Colors.white,
-//             child: ConstrainedBox(
-//               constraints: const BoxConstraints(maxHeight: 250),
-//               child: _buildDropdownList(),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
+class _PaginationDropdownListState extends State<PaginationDropdownList> {
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
 
-//     overlay.insert(_overlayEntry!);
-//     setState(() => _isDropdownOpen = true);
-//   }
+  List<String> _items = [];
+  String? _selectedItem;
+  bool _isOpen = false;
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasError = false;
 
-//   void _closeDropdown() {
-//     _overlayEntry?.remove();
-//     _overlayEntry = null;
-//     setState(() => _isDropdownOpen = false);
-//   }
+  // Pagination variables
+  int _currentPage = 1;
+  bool _hasMore = true;
 
-//   Widget _buildDropdownList() {
-//     if (_hasError) {
-//       return Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Text(widget.errorMessage ?? 'Error loading items'),
-//           ),
-//           TextButton(onPressed: _resetAndFetch, child: const Text('Retry')),
-//         ],
-//       );
-//     }
+  final ScrollController _scrollController = ScrollController();
 
-//     if (_items.isEmpty && _isLoading) {
-//       return const Center(
-//         child: Padding(
-//           padding: EdgeInsets.all(16.0),
-//           child: CircularProgressIndicator(),
-//         ),
-//       );
-//     }
+  @override
+  void initState() {
+    super.initState();
+    _selectedItem = widget.initialItem;
 
-//     if (_items.isEmpty && !_isLoading) {
-//       return Center(
-//         child: Padding(
-//           padding: const EdgeInsets.all(16.0),
-//           child: Text(widget.notItemMessage ?? 'No items found'),
-//         ),
-//       );
-//     }
+    // Listen for bottom scroll to trigger pagination
+    _scrollController.addListener(_onScroll);
+  }
 
-//     return ListView.builder(
-//       controller: _scrollController,
-//       padding: EdgeInsets.zero,
-//       itemCount: _items.length + (_isLoading ? 1 : 0) + (_hasMore ? 0 : 1),
-//       itemBuilder: (context, index) {
-//         // Show loading indicator at the end
-//         if (index == _items.length && _isLoading) {
-//           return const Padding(
-//             padding: EdgeInsets.all(16.0),
-//             child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-//           );
-//         }
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 50 &&
+        !_isLoadingMore &&
+        _hasMore &&
+        !_hasError &&
+        widget.fetchItems != null) {
+      _fetchMoreData();
+    }
+  }
 
-//         // Show "no more items" message
-//         if (index == _items.length && !_hasMore) {
-//           return Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Center(
-//               child: Text(
-//                 widget.noMoreItemsMessage ?? 'No more items',
-//                 style: TextStyle(
-//                   color: Colors.grey.shade600,
-//                   fontStyle: FontStyle.italic,
-//                 ),
-//               ),
-//             ),
-//           );
-//         }
+  /// Fetch the first page of items
+  Future<void> _fetchInitialData() async {
+    if (widget.fetchItems == null) return;
 
-//         final item = _items[index];
-//         return ListTile(
-//           title: Text(widget.itemParser(item)),
-//           onTap: () {
-//             setState(() {
-//               _selectedItem = item;
-//             });
-//             _closeDropdown();
-//             widget.onChanged(item);
-//           },
-//         );
-//       },
-//     );
-//   }
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _currentPage = 1; // Reset to page 1
+      _items.clear();
+      _hasMore = true;
+    });
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return CompositedTransformTarget(
-//       link: _layerLink,
-//       child: GestureDetector(
-//         onTap: _toggleDropdown,
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               widget.textTitle,
-//               style: const TextStyle(fontWeight: FontWeight.bold),
-//             ),
-//             const SizedBox(height: 4),
-//             Container(
-//               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-//               decoration: BoxDecoration(
-//                 borderRadius: BorderRadius.circular(8),
-//                 border: Border.all(color: Colors.grey.shade400),
-//               ),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Expanded(
-//                     child: Text(
-//                       _selectedItem != null
-//                           ? widget.itemParser(_selectedItem!)
-//                           : widget.hintText,
-//                       overflow: TextOverflow.ellipsis,
-//                     ),
-//                   ),
-//                   Icon(
-//                     _isDropdownOpen
-//                         ? Icons.arrow_drop_up
-//                         : Icons.arrow_drop_down,
-//                     color: Colors.grey.shade700,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+    try {
+      // Call fetchItems with page 1 and pageSize
+      final rawItems = await widget.fetchItems!(_currentPage, widget.pageSize);
+      final stringItems = rawItems
+          .map((item) => widget.itemParser(item))
+          .toList();
+
+      setState(() {
+        _items = stringItems;
+        _hasMore =
+            stringItems.length ==
+            widget
+                .pageSize; // If we got less items than pageSize, no more pages
+      });
+    } catch (e) {
+      debugPrint("Error fetching data: $e");
+      setState(() {
+        _hasError = true;
+        _hasMore = false;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// Fetch the next page of items
+  Future<void> _fetchMoreData() async {
+    if (widget.fetchItems == null) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final nextPage = _currentPage + 1; // Increment page number
+
+      // Call fetchItems with the next page number and pageSize
+      final rawItems = await widget.fetchItems!(nextPage, widget.pageSize);
+      final stringItems = rawItems
+          .map((item) => widget.itemParser(item))
+          .toList();
+
+      setState(() {
+        if (stringItems.isEmpty) {
+          _hasMore = false;
+        } else {
+          _currentPage = nextPage; // Update current page
+          _items.addAll(stringItems);
+          _hasMore =
+              stringItems.length ==
+              widget.pageSize; // Check if there might be more pages
+        }
+      });
+    } catch (e) {
+      debugPrint("Error fetching more data: $e");
+      // Don't set _hasMore to false on error, allow retry on next scroll
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  void _toggleDropdown() {
+    if (!widget.enabled) return;
+
+    if (_isOpen) {
+      _removeOverlay();
+    } else {
+      _showOverlay();
+      if (_items.isEmpty && !_isLoading && !_hasError) {
+        _fetchInitialData();
+      }
+    }
+  }
+
+  void _showOverlay() {
+    final overlay = Overlay.of(context);
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final size = renderBox?.size ?? Size(400, 50);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return GestureDetector(
+          onTap: _removeOverlay,
+          behavior: HitTestBehavior.translucent,
+          child: Material(
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Positioned.fill(child: Container(color: Colors.transparent)),
+                Positioned(
+                  width: size.width,
+                  child: CompositedTransformFollower(
+                    link: _layerLink,
+                    showWhenUnlinked: false,
+                    offset: Offset(0, 45),
+                    child: _buildDropdownContentWithDirection(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    overlay.insert(_overlayEntry!);
+    setState(() {
+      _isOpen = true;
+    });
+  }
+
+  Widget _buildDropdownContentWithDirection() {
+    // Get the text direction from the original context
+    final textDirection = Directionality.of(context);
+
+    return Directionality(
+      textDirection: textDirection,
+      child: _buildDropdownContent(),
+    );
+  }
+
+  Widget _buildDropdownContent() {
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: widget.grey.withOpacity(0.3)),
+        ),
+        constraints: BoxConstraints(maxHeight: 200, minHeight: 50),
+        child: _buildListContent(),
+      ),
+    );
+  }
+
+  Widget _buildListContent() {
+    if (_isLoading && _items.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_hasError && _items.isEmpty) {
+      return _buildErrorState();
+    }
+
+    if (_items.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        return false;
+      },
+      child: ListView.builder(
+        controller: _scrollController,
+        shrinkWrap: true,
+        itemCount:
+            _items.length + (_isLoadingMore ? 1 : 0) + (_hasMore ? 0 : 1),
+        itemBuilder: (context, index) {
+          if (index < _items.length) {
+            final item = _items[index];
+            return _buildListItem(item);
+          } else if (index == _items.length && _isLoadingMore) {
+            return _buildLoadingMoreItem();
+          } else {
+            return _buildNoMoreItems();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildListItem(String item) {
+    final isSelected = item == _selectedItem;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return Material(
+      color: isSelected ? widget.grey.withOpacity(0.1) : Colors.transparent,
+      child: ListTile(
+        title: Text(
+          item,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            color: isSelected ? widget.selectedColor : Colors.black,
+          ),
+          textAlign: isRTL ? TextAlign.right : TextAlign.left,
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        onTap: () {
+          setState(() {
+            _selectedItem = item;
+          });
+          widget.onChanged(item);
+          _removeOverlay();
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingMoreItem() {
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoMoreItems() {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Center(
+        child: Text(
+          widget.noMoreItemsMessage!,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: widget.greyLight,
+            fontStyle: FontStyle.italic,
+          ),
+          textAlign: isRTL ? TextAlign.right : TextAlign.left,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return widget.errorStateWidget ??
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 24),
+              SizedBox(height: 8),
+              Text(
+                widget.errorMessage!,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+                textAlign: isRTL ? TextAlign.right : TextAlign.left,
+              ),
+              SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () {
+                  _fetchInitialData();
+                  _overlayEntry?.markNeedsBuild();
+                },
+                child: Text(
+                  'Retry',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );
+  }
+
+  Widget _buildEmptyState() {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return widget.emptyStateWidget ??
+        Center(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              widget.noItemMessage!,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: widget.greyLight,
+              ),
+              textAlign: isRTL ? TextAlign.right : TextAlign.left,
+            ),
+          ),
+        );
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    setState(() {
+      _isOpen = false;
+    });
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+
+    if (_isOpen && _overlayEntry != null && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _overlayEntry?.markNeedsBuild();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _removeOverlay();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        if (widget.textTitle.isNotEmpty) ...[
+          Row(
+            children: [
+              Text(
+                widget.textTitle,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: widget.greyLight,
+                ),
+              ),
+              if (widget.isRequired == true) ...[
+                SizedBox(width: 4),
+                Text(
+                  '*',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          SizedBox(height: 5),
+        ],
+        CompositedTransformTarget(
+          link: _layerLink,
+          child: GestureDetector(
+            onTap: _toggleDropdown,
+            child: Container(
+              width: 400,
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _isOpen ? widget.primary : widget.grey,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                color: widget.enabled
+                    ? Colors.white
+                    : widget.grey.withOpacity(0.1),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _selectedItem ?? widget.hintText,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: _selectedItem != null
+                            ? Colors.black
+                            : widget.greyLight,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(
+                    _isOpen
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: widget.enabled ? widget.grey : widget.greyLight,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
