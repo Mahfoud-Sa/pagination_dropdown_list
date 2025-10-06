@@ -8,4 +8,4 @@ library PaginationDropdownList;
 /// ```
 
 // Re-export everything from our public API
-export 'src/pagination_dropdown_list.dart';
+export 'src/pagination_dropdown_list.dart' show PaginationDropdownList;

@@ -36,7 +36,7 @@ import 'package:pagination_dropdown_liste/pagination_dropdown_liste.dart';
 ## 🧩 Example
 
 ```dart
-PaginationDropdownList<User>(
+PaginationDropdownList(
   textTitle: 'User',
   hintText: 'Select user',
   initialItem: currentUser.name,
