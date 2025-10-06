@@ -1,6 +1,6 @@
 name: pagination_dropdown_liste
 description: "flutter drop sown list with paganation that enable you to fectch data while scrolling. "
-version: 0.0.2
+version: 0.1.4
 homepage: https://github.com/Mahfoud-Sa/pagination_dropdown_liste
 
 environment:

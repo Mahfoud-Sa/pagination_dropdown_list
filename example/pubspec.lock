@@ -150,10 +150,9 @@ packages:
   pagination_dropdown_liste:
     dependency: "direct dev"
     description:
-      name: pagination_dropdown_liste
-      sha256: f2f08fe7b6532b2b40682e6de4b540a5f07ccd24f580f88377ee3e6e7bcf2034
-      url: "https://pub.dev"
-    source: hosted
+      path: ".."
+      relative: true
+    source: path
     version: "0.0.2"
   path:
     dependency: transitive
