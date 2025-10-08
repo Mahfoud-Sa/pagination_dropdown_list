@@ -1,4 +1,4 @@
-# pagination_dropdown_liste
+# pagination_dropdown_list
 
 A powerful and easy-to-use Flutter widget that displays a **dropdown list with built-in pagination** support.  
 Perfect for loading large datasets efficiently without fetching all data at once.
@@ -22,13 +22,13 @@ Add the dependency in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  pagination_dropdown_liste: ^1.0.0
+  pagination_dropdown_list: ^1.0.0
 ```
 
 Then, import it in your Dart file:
 
 ```dart
-import 'package:pagination_dropdown_liste/pagination_dropdown_liste.dart';
+import 'package:pagination_dropdown_list/pagination_dropdown_list.dart';
 ```
 
 ---
@@ -101,5 +101,5 @@ Feel free to open a PR or issue on GitHub.
 ---
 
 **Developed by:** Engineer Mahfoud Mohammed Bin Sabbah  
-**License:** BSD-3-Clause  
-**Pub.dev:** [pagination_dropdown_liste](https://pub.dev/packages/pagination_dropdown_liste)
+**License:** MIT  
+**Pub.dev:** [pagination_dropdown_list](https://pub.dev/packages/pagination_dropdown_list)

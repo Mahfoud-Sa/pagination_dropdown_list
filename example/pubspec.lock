@@ -147,13 +147,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.16.0"
-  pagination_dropdown_liste:
-    dependency: "direct dev"
+  pagination_dropdown_list:
+    dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.1.6"
+      name: pagination_dropdown_list
+      sha256: "007f6175ff79e981868488d49d54f99db55babb94a279cad106876459ee6fc86"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.7"
   path:
     dependency: transitive
     description:

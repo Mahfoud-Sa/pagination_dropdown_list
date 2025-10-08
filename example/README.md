@@ -10,7 +10,7 @@ Each time the user reaches the end of the list, the widget automatically fetches
 ```dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:pagination_dropdown_liste/pagination_dropdown_liste.dart';
+import 'package:pagination_dropdown_list/pagination_dropdown_list.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
@@ -121,4 +121,4 @@ When you open the dropdown, it will:
 
 ---
 
-**Package:** [pagination_dropdown_liste](https://pub.dev/packages/pagination_dropdown_liste)
+**Package:** [pagination_dropdown_list](https://pub.dev/packages/pagination_dropdown_list)
