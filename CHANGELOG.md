@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 -fitst release
 
 
-## [0.2.0] - 2023-09-20
+## [0.2.0] - 2025-10-8
 
 ### Added
 - Initial release of the package
@@ -17,12 +17,6 @@ All notable changes to this project will be documented in this file.
 - Example app
 ### Changed
 - Impoving affective dart 
-    Use non-nullable with default values
-    Use static const for colors and dimensions
-    Fixed Access in _PaginationDropdownListState
-
-- Updated minimum Flutter SDK to 3.0.0
-
-### Fixed
-- Crash on Android when disposing controller
-- Memory leak in image caching
+- Use non-nullable with default values
+- Use static const for colors and dimensions
+- Fixed Access in _PaginationDropdownListState
