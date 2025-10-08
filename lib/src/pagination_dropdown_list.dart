@@ -41,9 +41,10 @@ class PaginationDropdownList extends StatefulWidget {
   final Widget? errorStateWidget;
 
   //colors
-  final Color primary = Color(0xFFFF746B); //
-  final Color grey = Color(0xffDDDDDD);
-  final Color greyLight = Color(0xff979797); //
+  static const Color primaryColor = Color(0xFFFF746B); //
+
+  static const Color greyColor = Color(0xffDDDDDD);
+  static const Color greyLightColor = Color(0xff979797); //
 
   //selected item colot
   final Color selectedColor;
@@ -53,17 +54,17 @@ class PaginationDropdownList extends StatefulWidget {
 
   /// no more items message
   /// default: "No more items"
-  final String? noMoreItemsMessage;
+  final String noMoreItemsMessage;
 
   /// error message
   /// default: "error occurred while fetching data"
-  final String? errorMessage;
+  final String errorMessage;
 
   /// no Item message
   /// default: "No items available"
-  final String? noItemMessage;
+  final String noItemMessage;
 
-  PaginationDropdownList({
+  const PaginationDropdownList({
     super.key,
     required this.textTitle,
     required this.hintText,
@@ -79,7 +80,7 @@ class PaginationDropdownList extends StatefulWidget {
     this.emptyStateWidget,
     this.errorStateWidget,
     this.pageSize = 10,
-    this.selectedColor = const Color(0xFFFF746B),
+    this.selectedColor = primaryColor,
   });
 
   @override
@@ -268,7 +269,9 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: widget.grey.withOpacity(0.3)),
+          border: Border.all(
+            color: PaginationDropdownList.greyColor.withValues(alpha: .3),
+          ),
         ),
         constraints: BoxConstraints(maxHeight: 200, minHeight: 50),
         child: _buildListContent(),
@@ -322,7 +325,9 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
     final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     return Material(
-      color: isSelected ? widget.grey.withOpacity(0.1) : Colors.transparent,
+      color: isSelected
+          ? PaginationDropdownList.greyColor.withValues(alpha: .1)
+          : Colors.transparent,
       child: ListTile(
         title: Text(
           item,
@@ -365,11 +370,11 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
       padding: EdgeInsets.all(16),
       child: Center(
         child: Text(
-          widget.noMoreItemsMessage!,
+          widget.noMoreItemsMessage,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: widget.greyLight,
+            color: PaginationDropdownList.greyLightColor,
             fontStyle: FontStyle.italic,
           ),
           textAlign: isRTL ? TextAlign.right : TextAlign.left,
@@ -390,7 +395,7 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
               Icon(Icons.error_outline, color: Colors.red, size: 24),
               SizedBox(height: 8),
               Text(
-                widget.errorMessage!,
+                widget.errorMessage,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -422,11 +427,11 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Text(
-              widget.noItemMessage!,
+              widget.noItemMessage,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: widget.greyLight,
+                color: PaginationDropdownList.greyLightColor,
               ),
               textAlign: isRTL ? TextAlign.right : TextAlign.left,
             ),
@@ -475,7 +480,7 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: widget.greyLight,
+                  color: PaginationDropdownList.greyLightColor,
                 ),
               ),
               if (widget.isRequired == true) ...[
@@ -502,12 +507,14 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: _isOpen ? widget.primary : widget.grey,
+                  color: _isOpen
+                      ? PaginationDropdownList.primaryColor
+                      : PaginationDropdownList.greyColor,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 color: widget.enabled
                     ? Colors.white
-                    : widget.grey.withOpacity(0.1),
+                    : PaginationDropdownList.greyColor.withValues(alpha: 0.1),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -520,7 +527,7 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
                         fontWeight: FontWeight.w600,
                         color: _selectedItem != null
                             ? Colors.black
-                            : widget.greyLight,
+                            : PaginationDropdownList.greyLightColor,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -529,7 +536,9 @@ class _PaginationDropdownListState extends State<PaginationDropdownList> {
                     _isOpen
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
-                    color: widget.enabled ? widget.grey : widget.greyLight,
+                    color: widget.enabled
+                        ? PaginationDropdownList.greyColor
+                        : PaginationDropdownList.greyLightColor,
                     size: 20,
                   ),
                 ],

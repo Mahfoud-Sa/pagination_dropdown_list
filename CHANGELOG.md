@@ -16,7 +16,11 @@ All notable changes to this project will be documented in this file.
 - Basic widget functionality
 - Example app
 ### Changed
-- Improved performance of animation system
+- Impoving affective dart 
+    Use non-nullable with default values
+    Use static const for colors and dimensions
+    Fixed Access in _PaginationDropdownListState
+
 - Updated minimum Flutter SDK to 3.0.0
 
 ### Fixed

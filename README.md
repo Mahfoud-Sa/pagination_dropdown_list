@@ -84,7 +84,7 @@ It’s fully compatible with **Material 3** and **Directionality (RTL/LTR)**.
 ## 📸 Preview
 
 
-![Example preview](image-1.png)
+![Example preview]!(preview_img.png)
 ## 🧾 Notes
 
 - Works perfectly with REST APIs, Firebase, or any async data source.  

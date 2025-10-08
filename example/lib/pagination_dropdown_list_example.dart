@@ -165,6 +165,8 @@ class OrderService {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -179,6 +181,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ECommerceDashboard extends StatefulWidget {
+  const ECommerceDashboard({super.key});
+
   @override
   State<ECommerceDashboard> createState() => _ECommerceDashboardState();
 }
@@ -228,7 +232,7 @@ class _ECommerceDashboardState extends State<ECommerceDashboard> {
                 });
               },
               itemParser: (product) =>
-                  '${(product as Product).name} - \$${(product as Product).price}',
+                  '${(product as Product).name} - \$${product.price}',
               fetchItems: (page, pageSize) async =>
                   await _productService.getProducts(page, pageSize),
             ),
@@ -271,7 +275,7 @@ class _ECommerceDashboardState extends State<ECommerceDashboard> {
                               });
                             },
                             itemParser: (customer) =>
-                                '${(customer as Customer).name} - ${(customer as Customer).city}',
+                                '${(customer as Customer).name} - ${customer.city}',
                             fetchItems: (page, pageSize) async =>
                                 await _customerService.getCustomers(
                                   page,
@@ -314,7 +318,7 @@ class _ECommerceDashboardState extends State<ECommerceDashboard> {
                                 });
                               },
                               itemParser: (customer) =>
-                                  '${(customer as Customer).name} - ${(customer as Customer).city}',
+                                  '${(customer as Customer).name} - ${customer.city}',
                               fetchItems: (page, pageSize) async =>
                                   await _arabicCustomerService
                                       .getArabicCustomers(page, pageSize),
@@ -351,7 +355,7 @@ class _ECommerceDashboardState extends State<ECommerceDashboard> {
                 });
               },
               itemParser: (order) =>
-                  '${(order as Order).orderNumber} - \$${(order as Order).total} - ${(order as Order).status}',
+                  '${(order as Order).orderNumber} - \$${order.total} - ${order.status}',
               fetchItems: (page, pageSize) async =>
                   await _orderService.getOrders(page, pageSize),
             ),
